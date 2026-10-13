@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Garanzie Estendo + MLG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--card:#161a22;--line:#232936;--inp:#2a3140;--gold:#e8b84b;--gold2:#b8860b;--gold3:#c9971f;--txt:#e9ecf2;--mut:#8b94a7;--ok:#4ade80;--ko:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:'DM Sans',system-ui,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+.home{display:block;width:100%;padding:16px;margin-bottom:16px;text-align:center;text-decoration:none;font-weight:700;font-size:17px;color:var(--gold);background:var(--card);border:1px solid var(--gold3);border-radius:12px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 16px 16px;margin-bottom:14px;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--gold2),var(--gold),var(--gold3))}
+h1{margin:0 0 4px;font-size:22px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 4px}
+label.t{display:block;font-size:13px;color:var(--mut);margin:0 0 8px}
+.pdv{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.pdv button{padding:14px 8px;font:600 16px 'DM Sans',sans-serif;color:var(--txt);background:var(--bg);border:1px solid var(--inp);border-radius:10px;cursor:pointer}
+.pdv button.on{color:#0d0f14;border-color:var(--gold);background:linear-gradient(135deg,var(--gold),var(--gold3))}
+input[type=date]{width:100%;padding:12px;font:500 16px 'DM Mono',monospace;color:var(--txt);background:var(--bg);border:1px solid var(--inp);border-radius:10px}
+input:focus{outline:none;border-color:var(--gold)}
+.add{padding:14px 0;border-top:1px solid var(--line)}
+.add:first-of-type{border-top:0}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.nome{font-weight:700;font-size:17px}
+.ass{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:14px;font-weight:600;color:var(--mut);background:var(--bg);border:1px solid var(--inp);border-radius:10px;cursor:pointer}
+.ass input{width:20px;height:20px;accent-color:var(--gold)}
+.add.off .r{opacity:.35}
+.add.off .ass{color:var(--gold);border-color:var(--gold3)}
+.r{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+.r span{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+.r input{width:100%;padding:12px;font:500 18px 'DM Mono',monospace;text-align:center;color:var(--txt);background:var(--bg);border:1px solid var(--inp);border-radius:10px}
+.sum{min-width:54px;text-align:center;font:500 22px 'DM Mono',monospace;color:var(--gold);padding-bottom:10px}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:14px;border-top:1px solid var(--gold3)}
+.tot b{font:500 32px 'DM Mono',monospace;color:var(--gold)}
+.send{width:100%;margin-top:14px;padding:18px;font:700 17px 'DM Sans',sans-serif;color:#0d0f14;border:0;border-radius:12px;cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--gold3))}
+.send:disabled{opacity:.5}
+.msg{margin-top:12px;padding:12px;border-radius:10px;font-size:15px;display:none}
+.msg.ok{display:block;background:#10261a;color:var(--ok);border:1px solid #1d4d31}
+.msg.ko{display:block;background:#2a1414;color:var(--ko);border:1px solid #5a2323}
+.btns{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btns button{padding:16px 8px;font:700 16px 'DM Sans',sans-serif;color:var(--gold);background:var(--bg);border:1px solid var(--gold3);border-radius:12px;cursor:pointer}
+.empty{color:var(--mut);font-size:14px;padding:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="home" id="home" href="#">← Torna alla Home Hub</a>
+
+  <div class="card">
+    <h1>Garanzie Estendo + MLG</h1>
+    <p class="sub">Scegli il tuo PDV e inserisci i numeri di oggi.</p>
+  </div>
+
+  <div class="card">
+    <label class="t">PDV</label>
+    <div class="pdv" id="pdv"></div>
+  </div>
+
+  <div class="card" id="box" style="display:none">
+    <label class="t" for="data">Data</label>
+    <input type="date" id="data">
+    <div style="height:14px"></div>
+    <div id="lista"></div>
+    <div class="tot"><span>Totale PDV</span><b id="tot">0</b></div>
+    <button class="send" id="send">Salva garanzie</button>
+    <div class="msg" id="msg"></div>
+    <div class="btns" id="btns"><button id="tg">Invia su Telegram</button><button id="ml">Invia per mail</button></div>
+  </div>
+</div>
+
+<script>
+const APPS_URL = 'https://script.google.com/macros/s/AKfycbxknYcqvXzDnNjWqZI9MkOrSMU5kagteE64E7-wxJYVB3NWLNvE8CP_wrkmy9Q7K1ko/exec';
+const HUB_URL  = '#';
+const MAIL_DIEGO = 'd.pavoni@dml-italia.com';
+const PDV = ['Fano','Monsano','Osimo','Macerata','Civitanova','Pesaro','Foligno'];
+
+const $ = id => document.getElementById(id);
+let cur = null, lastMsg = '', lastSubj = '';
+$('home').href = HUB_URL;
+
+(function init(){
+  const d = new Date();
+  $('data').value = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  PDV.forEach(p=>{
+    const b = document.createElement('button');
+    b.textContent = p;
+    b.onclick = ()=>scegli(p);
+    $('pdv').appendChild(b);
+  });
+  let last = null;
+  try{ last = localStorage.getItem('garanzie_pdv'); }catch(e){}
+  if(last && PDV.includes(last)) scegli(last);
+})();
+
+async function scegli(p){
+  cur = p;
+  try{ localStorage.setItem('garanzie_pdv', p); }catch(e){}
+  [...$('pdv').children].forEach(b=>b.classList.toggle('on', b.textContent===p));
+  $('box').style.display = 'block';
+  $('msg').className = 'msg';
+  $('btns').style.display = 'none';
+  $('lista').innerHTML = '<div class="empty">Caricamento addetti…</div>';
+  try{
+    const r = await fetch(APPS_URL+'?action=staff&pdv='+encodeURIComponent(p));
+    const j = await r.json();
+    disegna(j.staff||[]);
+  }catch(e){
+    $('lista').innerHTML = '<div class="empty">Impossibile caricare gli addetti. Riprova.</div>';
+  }
+}
+
+function disegna(staff){
+  const L = $('lista');
+  L.innerHTML = '';
+  if(!staff.length){ L.innerHTML = '<div class="empty">Nessun addetto inserito per questo PDV.</div>'; calcola(); return; }
+  staff.forEach(n=>{
+    const row = document.createElement('div');
+    row.className = 'add';
+    row.dataset.nome = n;
+    const nm = document.createElement('div');
+    nm.className = 'nome'; nm.textContent = n;
+    const g = document.createElement('div');
+    g.className = 'r';
+    g.innerHTML = '<div><span>Estendo</span><input type="number" inputmode="numeric" min="0" placeholder="0" class="e"></div>'+
+                  '<div><span>MLG</span><input type="number" inputmode="numeric" min="0" placeholder="0" class="m"></div>'+
+                  '<div class="sum">0</div>';
+    const as = document.createElement('label');
+    as.className = 'ass';
+    as.innerHTML = '<input type="checkbox" class="a"> Assente';
+    const top = document.createElement('div');
+    top.className = 'top';
+    top.append(nm,as);
+    row.append(top,g);
+    L.appendChild(row);
+  });
+  L.querySelectorAll('input').forEach(i=>{ i.addEventListener('input',calcola); i.addEventListener('change',calcola); });
+  calcola();
+}
+
+function calcola(){
+  let t = 0;
+  document.querySelectorAll('.add').forEach(r=>{
+    const as = r.querySelector('.a').checked;
+    r.classList.toggle('off', as);
+    r.querySelector('.e').disabled = as;
+    r.querySelector('.m').disabled = as;
+    if(as){ r.querySelector('.e').value=''; r.querySelector('.m').value=''; r.querySelector('.sum').textContent='—'; return; }
+    const e = parseInt(r.querySelector('.e').value,10)||0;
+    const m = parseInt(r.querySelector('.m').value,10)||0;
+    r.querySelector('.sum').textContent = e+m;
+    t += e+m;
+  });
+  $('tot').textContent = t;
+  $('btns').style.display = 'none';
+}
+
+$('send').onclick = async ()=>{
+  const righe = [...document.querySelectorAll('.add')].map(r=>({
+    addetto: r.dataset.nome,
+    assente: r.querySelector('.a').checked,
+    estendo: parseInt(r.querySelector('.e').value,10)||0,
+    mlg: parseInt(r.querySelector('.m').value,10)||0
+  }));
+  const msg = $('msg');
+  if(!cur || !righe.length){ msg.className='msg ko'; msg.textContent='Scegli un PDV con almeno un addetto.'; return; }
+  $('send').disabled = true;
+  msg.className='msg'; msg.textContent='';
+  try{
+    const r = await fetch(APPS_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({pdv:cur, data:$('data').value, righe})
+    });
+    const j = await r.json();
+    if(j.ok){
+      msg.className='msg ok';
+      msg.textContent='Salvato. Totale garanzie '+j.totale+' (Estendo '+j.estendo+' + MLG '+j.mlg+'). Ora invia il messaggio.';
+      const pp = $('data').value.split('-');
+      const dIt = pp[2]+'/'+pp[1]+'/'+pp[0];
+      lastSubj = 'Garanzie '+cur+' - '+dIt;
+      lastMsg = 'GARANZIE '+cur.toUpperCase()+' - '+dIt+'\n\n';
+      righe.forEach(x=>{ lastMsg += x.assente ? x.addetto+': ASSENTE\n' : x.addetto+': Estendo '+x.estendo+' + MLG '+x.mlg+' = '+(x.estendo+x.mlg)+'\n'; });
+      lastMsg += '\nTOTALE PDV: '+j.totale+' (Estendo '+j.estendo+' + MLG '+j.mlg+')';
+      $('btns').style.display = 'grid';
+    }else{
+      msg.className='msg ko'; msg.textContent='Errore: '+(j.err||'riprova');
+    }
+  }catch(e){
+    msg.className='msg ko'; msg.textContent='Invio non riuscito. Controlla la connessione e riprova.';
+  }
+  $('send').disabled = false;
+};
+$('tg').onclick = ()=>{ window.location.href = 'https://t.me/share/url?url=%20&text='+encodeURIComponent(lastMsg); };
+$('ml').onclick = ()=>{ window.location.href = 'mailto:'+MAIL_DIEGO+'?subject='+encodeURIComponent(lastSubj)+'&body='+encodeURIComponent(lastMsg); };
+</script>
+</body>
+</html>
